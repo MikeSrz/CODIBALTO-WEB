@@ -1,0 +1,2 @@
+#Obliganddo a los ficheros a usar LF como fin de línea, evitando problemas de formato en diferentes sistemas operativos.
+* text=auto eol=lf
