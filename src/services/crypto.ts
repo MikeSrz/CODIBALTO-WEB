@@ -85,7 +85,7 @@ export async function derivateMKey(masterKey: CryptoKey, info: string): Promise<
 
 
 
-export async function encryptData(data: string,encKey: CryptoKey) : Promise<{cyphertext: ArrayBuffer, iv: Uint8Array}> { //retorna un objetco con el texto cifrado y el IV utilizado para el cifrado. Iv es vital para descrifrado.
+export async function encryptData(data: string, encKey: CryptoKey) : Promise<{cyphertext: ArrayBuffer, iv: Uint8Array}> { //retorna un objetco con el texto cifrado y el IV utilizado para el cifrado. Iv es vital para descrifrado.
     const encoder = new TextEncoder();
     const dataBytes = encoder.encode(data);
     const iv : Uint8Array = crypto.getRandomValues(new Uint8Array(12)); // AES-GCM recomienda un IV de 12 bytes
