@@ -13,7 +13,7 @@ export function generateSalt(length: number = 16): Uint8Array { //Se genera un s
     return crypto.getRandomValues(new Uint8Array(length));
 }
 
-export async function derivateMasterPassword(password: string, salt: Uint8Array, iterations: number) : Promise<CryptoKey> { // esta función deriva la contraseña maestra usando PBKDF2
+export async function derivateMasterPassword(password: string, salt: Uint8Array, iterations: number = 100000) : Promise<CryptoKey> { // esta función deriva la contraseña maestra usando PBKDF2
     const encoder = new TextEncoder();
     const passwordBytes = encoder.encode(password);
     const baseKey = await crypto.subtle.importKey(
@@ -39,7 +39,7 @@ export async function derivateMasterPassword(password: string, salt: Uint8Array,
         masterKeyArray,
         'HKDF',
         false,
-        ['deriveKey']
+        ['deriveKey', 'deriveBits']
     )
     return masterKey;
 }
@@ -50,9 +50,11 @@ export async function derivateMKey(masterKey: CryptoKey, info: string): Promise<
          {
             name: 'HKDF',
             hash: 'SHA-256',
+            salt: new Uint8Array(32), //ya tiene suficiente entropia en este punto. salt de ceros y ya. 
             info: infoCoded as BufferSource,
          },
             masterKey,
+            256
     );
     //controlamos segun el parámetro que se le pase si se trata de la clave de cifrado o de la clave de autenticación, para importarla con el algoritmo correcto
     let keyResult : CryptoKey;

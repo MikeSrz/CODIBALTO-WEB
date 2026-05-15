@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { generateSalt, derivateMasterPassword, derivateMKey, encryptData, decryptData } from '../services/crypto'; 
+import { generateSalt, derivateMasterPassword, derivateMKey, encryptData, decryptData } from '../services/cryptoService'; 
 import { INFO_ENCRYPT } from '@/constants';
 
 describe('generateSalt', () => {
@@ -23,12 +23,12 @@ describe('derivateMasterPassword', () => {
 });
 
 describe('derivateMKey', () => {
-    it('Debe derivar una clave de cifrado a partir de la clave maestra', async () => {
+    it('Debe derivar una clave de cifrado(enc_key) a partir de la clave maestra(Mkey)', async () => {
         const password = 'testpassword';
         const salt = generateSalt();
         const iterations = 100000;
         const masterKey = await derivateMasterPassword(password, salt, iterations);
-        const encKey = await derivateMKey(masterKey, 'encryption');
+        const encKey = await derivateMKey(masterKey, 'info');
         expect(encKey).toBeInstanceOf(CryptoKey);
     });
 });
@@ -45,9 +45,10 @@ describe('encryptData and decryptData', () => {
         const { cyphertext, iv } = await encryptData(data, encKey);
         console.log("El iv es: " + iv);
         console.log("El cyphertext es: " + cyphertext);
-        
+
         const decryptedData = await decryptData(cyphertext, iv, encKey);
-        expect(decryptedData).toBeInstanceOf(Uint8Array);
-        expect(new TextDecoder().decode(cyphertext)).toBe('Datos ultra secretos!');
+        console.log("El tipado es: " + typeof(decryptedData));
+        expect(decryptedData).toBeTypeOf('string');
+        expect(decryptedData).toBe('Datos ultra secretos!');
     });
 }); 
