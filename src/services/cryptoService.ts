@@ -117,3 +117,13 @@ export async function decryptData(cyphertext: ArrayBuffer, iv: Uint8Array, encKe
     );
     return decoder.decode(decryptedBytes);
 }
+
+export async function hashAuthKey(authKey: CryptoKey, nonce: Uint8Array): Promise<ArrayBuffer> { // esta función hashea la authKey con el nonce usando SHA-256.
+    //Primero necesitamos el authKey en formato raw (ArrayBuffer)
+    const rawAuthKey = await crypto.subtle.exportKey('raw', authKey);
+    const composition = new Uint8Array(rawAuthKey.byteLength + nonce.byteLength);
+    composition.set(new Uint8Array(rawAuthKey), 0); //ponemos el array del authkey empezando como el primero.
+    composition.set(nonce, rawAuthKey.byteLength);  //y al final dejaremos el nonce.
+    const hash = await crypto.subtle.digest("SHA-256", composition);
+    return hash;
+}

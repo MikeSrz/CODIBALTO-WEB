@@ -9,17 +9,24 @@ export async function login(username: string, password: string) { //Aquí se des
     const master = await cryptoService.derivateMasterPassword(password, salt)
     const encKey = await cryptoService.derivateMKey(master, INFO_ENCRYPT)
     const authKey = await cryptoService.derivateMKey(master, INFO_AUTH)
-
+    //Generando hash para el challenge:
+    const nonce = await getNonceFromServer(username);
+    const hashAuth = await cryptoService.hashAuthKey(authKey, nonce); 
     const isAuth:boolean = await authenticate(authKey);
     if (isAuth) {
-        console.log("Login exitoso");
+        console.log("Login con exito");
         await authStore.saveLoginState(encKey, authKey);
     } else {
         console.log("Login fallido");
     }
 }
-export async function authenticate(generatedAuthKey: CryptoKey, iterations: number = 100000): Promise<boolean>{ //con la authKey generada probaremos si la api nos confirma que es correct.
+function authenticate(generatedAuthKey: CryptoKey, iterations: number = 100000): Promise<boolean>{ //con la authKey generada probaremos si la api nos confirma que es correct.
     //Mirar challenge algoritmo de autenticado. Intentar no enviar authKey directamente, sino un hash de esta o algo así.
+
+    //1. Pedir Nonce al servidor
+    //Hashear auth_key generado con el nonce y enviar el result al servidor.
+    //El servidor hace lo mismo por su lado y compara los resultados
+    //Si da true entonces es un auth exitoso.
     return axios.post('/api/authenticate', {authKey: generatedAuthKey, iterations: iterations})
     .then( response => {
         if(response.data.authenticated) {
@@ -34,7 +41,17 @@ export async function authenticate(generatedAuthKey: CryptoKey, iterations: numb
     })
 }
 
-export async function getSaltFromServer(username: string): Promise<Uint8Array> { //Según el username introducido 
+async function getNonceFromServer(username: string): Promise<Uint8Array> {
+    return axios.get(`/api/getNonce?username=${username}`)
+    .then( response => {
+        const nonce : Uint8Array = new Uint8Array(response.data.nonce);
+        return nonce;
+    }).catch( error => { 
+        console.error("Error: ", error);
+        throw error;
+    });
+}
+async function getSaltFromServer(username: string): Promise<Uint8Array> { //Según el username introducido 
     return axios.get(`/api/getSalt?username=${username}`)
     .then( response => {
         const salt : Uint8Array = new Uint8Array(response.data.salt);
