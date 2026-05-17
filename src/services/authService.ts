@@ -12,7 +12,7 @@ export async function login(username: string, password: string) { //Aquí se des
     //Generando hash para el challenge:
     const nonce = await getNonceFromServer(username);
     const hashAuth = await cryptoService.hashAuthKey(authKey, nonce); 
-    const isAuth:boolean = await authenticate(authKey);
+    const isAuth:boolean = await authenticate(hashAuth, username);
     if (isAuth) {
         console.log("Login con exito");
         await authStore.saveLoginState(encKey, authKey);
@@ -20,14 +20,14 @@ export async function login(username: string, password: string) { //Aquí se des
         console.log("Login fallido");
     }
 }
-function authenticate(generatedAuthKey: CryptoKey, iterations: number = 100000): Promise<boolean>{ //con la authKey generada probaremos si la api nos confirma que es correct.
+function authenticate(generatedAuthKey: ArrayBuffer, username: string, iterations: number = 100000): Promise<boolean>{ //con la authKey generada probaremos si la api nos confirma que es correct.
     //Mirar challenge algoritmo de autenticado. Intentar no enviar authKey directamente, sino un hash de esta o algo así.
 
     //1. Pedir Nonce al servidor
     //Hashear auth_key generado con el nonce y enviar el result al servidor.
     //El servidor hace lo mismo por su lado y compara los resultados
     //Si da true entonces es un auth exitoso.
-    return axios.post('/api/authenticate', {authKey: generatedAuthKey, iterations: iterations})
+    return axios.post('/api/authenticate', {authKey: generatedAuthKey, username: username, iterations: iterations})
     .then( response => {
         if(response.data.authenticated) {
             console.log("Autenticación exitosa");
@@ -47,7 +47,7 @@ async function getNonceFromServer(username: string): Promise<Uint8Array> {
         const nonce : Uint8Array = new Uint8Array(response.data.nonce);
         return nonce;
     }).catch( error => { 
-        console.error("Error: ", error);
+        console.error("Error al obtener el nonce del servidor: ", error);
         throw error;
     });
 }
