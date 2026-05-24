@@ -1,4 +1,5 @@
 import { INFO_AUTH, INFO_ENCRYPT } from "../constants";
+import type { EncryptedData } from "@/types";
 /*
  Este servicio se encarga de manejar operaciones criptográficas con Web Crypto API.
     - Generar sal aleatoria ~Listo
@@ -68,7 +69,7 @@ export async function derivateMKey(masterKey: CryptoKey, info: string): Promise<
                 ['encrypt', 'decrypt']
             );
             break;
-        case INFO_AUTH:
+        case INFO_AUTH: //llegué a la conclusión de que no me haría falta por un cambio en el algoritmo... Pero dejaré su código.
             keyResult = await crypto.subtle.importKey(
                 'raw',
                 key,
@@ -87,22 +88,23 @@ export async function derivateMKey(masterKey: CryptoKey, info: string): Promise<
 
 
 
-export async function encryptData(data: string, encKey: CryptoKey) : Promise<{cyphertext: ArrayBuffer, iv: Uint8Array}> { //retorna un objetco con el texto cifrado y el IV utilizado para el cifrado. Iv es vital para descrifrado.
+export async function encryptData(data: string | CryptoKey , encKey: CryptoKey) : Promise<EncryptedData> { //retorna un objetco con el texto cifrado y el IV utilizado para el cifrado. Iv es vital para descrifrado.
     const encoder = new TextEncoder();
-    const dataBytes = encoder.encode(data);
+    const dataBytes = (typeof data == "string") ? encoder.encode(data.toString()) : await crypto.subtle.exportKey("pkcs8", data) ;
     const iv : Uint8Array = crypto.getRandomValues(new Uint8Array(12)); //AES-GCM recomienda un iv de 12 bytes
 
-    const cyphertext = await crypto.subtle.encrypt(
+    const cypherData = await crypto.subtle.encrypt(
         {
             name: 'AES-GCM',
             iv: iv.buffer as ArrayBuffer
         },
         encKey,
-        dataBytes
+        dataBytes as ArrayBuffer
     );
    
-    return {cyphertext: cyphertext, iv: iv};
+    return {cyphertext: cypherData, iv: iv};
 }
+
 
 
 export async function decryptData(cyphertext: ArrayBuffer, iv: Uint8Array, encKey: CryptoKey) : Promise<string> { // esta función descifra los datos cifrados usando AES-GCM y el IV utilizado para el cifrado
@@ -118,15 +120,25 @@ export async function decryptData(cyphertext: ArrayBuffer, iv: Uint8Array, encKe
     return decoder.decode(decryptedBytes);
 }
 
-export async function signChallenge(authKey: CryptoKey, nonce: Uint8Array): Promise<ArrayBuffer> {
-    //firmamos directo nativamente con el nav
-    const signature = await crypto.subtle.sign(
+export async function signChallengeECDSA(privateKey: CryptoKey, nonce: Uint8Array): Promise<ArrayBuffer> { //firma del nonce con nuestra clave privada descifrada
+    return await crypto.subtle.sign(
         {
-            name: "HMAC"
+            name: "ECDSA",
+            hash: { name: "SHA-256" }
         },
-        authKey,
+        privateKey,
         nonce as BufferSource
     );
+}
 
-    return signature;
+//CryptoKeyPair es un diccionario de CryptoKey primero es public y el segundo
+export async function generateAuthKeyPair(): Promise<CryptoKeyPair> {
+    return await crypto.subtle.generateKey(
+        {
+            name: "ECDSA",
+            namedCurve: "P-256" 
+        },
+        true, //Debe ser extraíble(true) para poder exportarla y cifrarla
+        ["sign", "verify"]
+    );
 }

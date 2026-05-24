@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { generateSalt, derivateMasterPassword, derivateMKey, encryptData, decryptData } from '../services/cryptoService'; 
+import { generateSalt, derivateMasterPassword, derivateMKey, encryptData, decryptData, generateAuthKeyPair, signChallengeECDSA } from '../services/cryptoService'; 
+import { encodeBase64 } from '../services/encodeService';
 import { INFO_ENCRYPT } from '@/constants';
+import type { EncryptedData } from '@/types';
 
 describe('generateSalt', () => {
     it('should generate a salt of the correct length', () => {
@@ -33,7 +35,7 @@ describe('derivateMKey', () => {
     });
 });
 
-describe('encryptData and decryptData', () => {
+describe('encryptData and decryptData V1', () => {
     it('Tiene que cifrar y descifrar datos', async () => {
         const password = 'testeo';
         const salt = generateSalt();
@@ -50,5 +52,31 @@ describe('encryptData and decryptData', () => {
         console.log("El tipado es: " + typeof(decryptedData));
         expect(decryptedData).toBeTypeOf('string');
         expect(decryptedData).toBe('Datos ultra secretos!');
+    });
+}); 
+
+describe('Probando flujo de registro', () => {
+    it('Tiene que comprobar firmas', async () => {
+        const password : string = "caracola";
+        //Obteniendo par de llaves pub, salt, enc key, priv cifrado. 
+        const asymethricKeys : CryptoKeyPair = await generateAuthKeyPair();
+        const salt : Uint8Array = generateSalt();
+        const Mkey : CryptoKey = await derivateMasterPassword(password,salt);
+        const encKey : CryptoKey = await derivateMKey(Mkey, INFO_ENCRYPT);
+        
+        //Fase de encriptacion de privKey:
+        const encriptedPrivKey : EncryptedData = await encryptData(asymethricKeys.privateKey, encKey);
+        console.log('IV : ' + encriptedPrivKey.iv )
+        console.log('Llave privada: ' + asymethricKeys.privateKey + '\nLlave Pública: ' + asymethricKeys.publicKey);
+        console.log('Llave cifrada: ' + encriptedPrivKey);
+        
+        //Formatos de salida POST por axios:
+        const base64PrivKey =  await encodeBase64(encriptedPrivKey.cyphertext);
+        const base64IV = await encodeBase64(encriptedPrivKey.iv)
+        const base64PubKey = await encodeBase64(asymethricKeys.publicKey);
+        const base64Salt = await encodeBase64(salt);
+
+        console.log('LLave Priv en base 64: ' + base64PrivKey + '\n' + 'Llave Pub en base 64: ' + base64PubKey + '\nIv Base 64: ' + base64IV + '\nSalt en base 64: ' + base64Salt);
+
     });
 }); 
