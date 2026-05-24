@@ -107,17 +107,17 @@ export async function encryptData(data: string | CryptoKey , encKey: CryptoKey) 
 
 
 
-export async function decryptData(cyphertext: ArrayBuffer, iv: Uint8Array, encKey: CryptoKey) : Promise<string> { // esta función descifra los datos cifrados usando AES-GCM y el IV utilizado para el cifrado
-    const decoder = new TextDecoder(); //Para decodificar el resultado.
+export async function decryptData(cyphertext: Uint8Array, iv: Uint8Array, encKey: CryptoKey) : Promise<ArrayBuffer> { // esta función descifra los datos cifrados usando AES-GCM y el IV utilizado para el cifrado
+    // Mejor lo hago fuera si lo necesito. const decoder = new TextDecoder(); //Para decodificar el resultado.
     const decryptedBytes = await crypto.subtle.decrypt(
         {
             name: 'AES-GCM',
             iv: iv.buffer as ArrayBuffer
         },
         encKey,
-        cyphertext
+        cyphertext.buffer as ArrayBuffer
     );
-    return decoder.decode(decryptedBytes);
+    return decryptedBytes;
 }
 
 export async function signChallengeECDSA(privateKey: CryptoKey, nonce: Uint8Array): Promise<ArrayBuffer> { //firma del nonce con nuestra clave privada descifrada

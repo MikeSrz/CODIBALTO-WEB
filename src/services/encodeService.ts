@@ -1,3 +1,4 @@
+import {KEY_TYPES} from '../constants'
 //funcion para codificar en base64 claves generadas.
 export async function encodeBase64(buffer: ArrayBuffer | Uint8Array | CryptoKey): Promise<string> {
     let bytes: Uint8Array;

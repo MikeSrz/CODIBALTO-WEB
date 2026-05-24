@@ -44,11 +44,13 @@ describe('encryptData and decryptData V1', () => {
         const encKey = await derivateMKey(masterKey, INFO_ENCRYPT);
 
         const data = 'Datos ultra secretos!';
-        const { cyphertext, iv } = await encryptData(data, encKey);
-        console.log("El iv es: " + iv);
-        console.log("El cyphertext es: " + cyphertext);
-
-        const decryptedData = await decryptData(cyphertext, iv, encKey);
+        const encryptedData : EncryptedData = await encryptData(data, encKey);
+        console.log("El iv es: " + encryptedData.iv);
+        console.log("El cyphertext es: " + encryptedData.cyphertext);
+        
+        const decoder = new TextDecoder();
+        const decryptedDataBuffer = await decryptData(new Uint8Array(encryptedData.cyphertext), encryptedData.iv, encKey);
+        const decryptedData : string = decoder.decode(decryptedDataBuffer);
         console.log("El tipado es: " + typeof(decryptedData));
         expect(decryptedData).toBeTypeOf('string');
         expect(decryptedData).toBe('Datos ultra secretos!');
