@@ -7,7 +7,7 @@ import axios from 'axios'
 
 const ENDPOINT_API_CHALLENGE = '/api/auth/challenge/'; 
 const ENDPOINT_API_KEYRECORD = '/api/auth/keyrecords/'
-const ENDPOINT_API_STORE = '/api/store-secrets/' 
+const ENDPOINT_API_STORE = '/api/auth/store-user/' 
 
 export async function register(username: string, email: string, password: string) {
     const salt : Uint8Array= cryptoService.generateSalt();
@@ -15,7 +15,7 @@ export async function register(username: string, email: string, password: string
     const encKey : CryptoKey = await cryptoService.derivateMKey(Mkey, INFO_ENCRYPT);
     const ECDSAkeys : CryptoKeyPair = await cryptoService.generateAuthKeyPair();
     const cypherData : EncryptedData = await cryptoService.encryptData(ECDSAkeys.privateKey, encKey);
-    await storeSecrets(salt, ECDSAkeys.publicKey, cypherData, email, username)
+    await storeUser(salt, ECDSAkeys.publicKey, cypherData, email, username)
 }
 export async function login(username: string, password: string) { //Aquí se despliega la lógica del login.
     //pinia
@@ -82,7 +82,7 @@ async function challenge(challengeRes: ArrayBuffer, username: string): Promise<b
     })
 }
 
-async function storeSecrets(pass_salt: Uint8Array, pubKey: CryptoKey, cypherData: EncryptedData, mail:string, usr: string) {
+async function storeUser(pass_salt: Uint8Array, pubKey: CryptoKey, cypherData: EncryptedData, mail:string, usr: string) {
     const encoded_salt      = await encodeService.encodeBase64(pass_salt);
     const encoded_pubKey    = await encodeService.encodeBase64(pubKey);
     const encoded_iv        = await encodeService.encodeBase64(cypherData.iv);
