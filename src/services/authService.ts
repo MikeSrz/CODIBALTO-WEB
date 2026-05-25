@@ -7,15 +7,15 @@ import axios from 'axios'
 
 const ENDPOINT_API_CHALLENGE = '/api/auth/challenge/'; 
 const ENDPOINT_API_KEYRECORD = '/api/auth/keyrecords/'
-const ENDPOINT_API_STORE = '/api/auth/store-user/' 
+const ENDPOINT_API_STORE = '/api/auth/register-user/' 
 
-export async function register(username: string, email: string, password: string) {
+export async function register(username: string, email: string, password: string, nombre: string, apellido: string) {
     const salt : Uint8Array= cryptoService.generateSalt();
     const Mkey : CryptoKey= await cryptoService.derivateMasterPassword(password, salt);
     const encKey : CryptoKey = await cryptoService.derivateMKey(Mkey, INFO_ENCRYPT);
     const ECDSAkeys : CryptoKeyPair = await cryptoService.generateAuthKeyPair();
     const cypherData : EncryptedData = await cryptoService.encryptData(ECDSAkeys.privateKey, encKey);
-    await storeUser(salt, ECDSAkeys.publicKey, cypherData, email, username)
+    await storeUser(salt, ECDSAkeys.publicKey, cypherData, email, username,nombre, apellido)
 }
 export async function login(username: string, password: string) { //Aquí se despliega la lógica del login.
     //pinia
@@ -82,19 +82,25 @@ async function challenge(challengeRes: ArrayBuffer, username: string): Promise<b
     })
 }
 
-async function storeUser(pass_salt: Uint8Array, pubKey: CryptoKey, cypherData: EncryptedData, mail:string, usr: string) {
+async function storeUser(pass_salt: Uint8Array, pubKey: CryptoKey, cypherData: EncryptedData, mail:string, usr: string, nom: string, apell: string) {
     const encoded_salt      = await encodeService.encodeBase64(pass_salt);
     const encoded_pubKey    = await encodeService.encodeBase64(pubKey);
     const encoded_iv        = await encodeService.encodeBase64(cypherData.iv);
     const encoded_cypherKey = await encodeService.encodeBase64(cypherData.cyphertext);
 
     await axios.post(`${ENDPOINT_API_STORE}`, {
-        salt:      encoded_salt,
-        publicKey: encoded_pubKey,
-        iv:        encoded_iv,
-        cypherKey: encoded_cypherKey,
-        email: mail,
-        username: usr,
+        security: {
+            salt:      encoded_salt,
+            publicKey: encoded_pubKey,
+            iv:        encoded_iv,
+            cypherKey: encoded_cypherKey,
+        },
+        user: {
+            email: mail,
+            username: usr,
+            nombre: nom,
+            apellido: apell
+        }
     });
 }
 
