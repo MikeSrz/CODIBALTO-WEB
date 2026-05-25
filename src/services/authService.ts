@@ -5,6 +5,9 @@ import * as cryptoService from './cryptoService'
 import * as encodeService from './encodeService'
 import axios from 'axios'
 
+const ENDPOINT_API_CHALLENGE = '/api/auth/challenge/'; 
+const ENDPOINT_API_KEYRECORD = '/api/auth/keyrecords/'
+const ENDPOINT_API_STORE = '/api/store-secrets/' 
 
 export async function register(username: string, email: string, password: string) {
     const salt : Uint8Array= cryptoService.generateSalt();
@@ -44,23 +47,6 @@ export async function login(username: string, password: string) { //Aquí se des
         console.log("Login fallido");
     }
 }
-async function challenge(challengeRes: ArrayBuffer, username: string): Promise<boolean>{ //con la firma generada probaremos si la api nos confirma que es correct.
-    const authStore = useAuthStore() //pinia
-    const base64ChallengeRes = encodeService.encodeBase64(challengeRes) //pasando a base64
-    return axios.post('/auth/salt', {authKey: base64ChallengeRes, username: username})
-    .then( response => {    
-        if(response.data.authenticated) {
-            console.log("Autenticación exitosa");
-            authStore.setAuthenticated(true);
-            return true;
-        } else {
-            console.log("Autenticación fallida");
-            authStore.setAuthenticated(false);
-            return false;
-        }
-    })
-}
-
 /*
 Ya no se usa
  getNonceFromServer(username: string): Promise<Uint8Array> {
@@ -74,13 +60,35 @@ Ya no se usa
     });
 }
 */
+/////////////////////////////////////////////////
+///             LLAMADAS a API              /////
+/////////////////////////////////////////////////
+
+
+async function challenge(challengeRes: ArrayBuffer, username: string): Promise<boolean>{ //con la firma generada probaremos si la api nos confirma que es correct.
+    const authStore = useAuthStore() //pinia
+    const base64ChallengeRes = encodeService.encodeBase64(challengeRes) //pasando a base64
+    return axios.post(`${ENDPOINT_API_CHALLENGE}`, {authKey: base64ChallengeRes, username: username})
+    .then( response => {    
+        if(response.data.authenticated) {
+            console.log("Autenticación exitosa");
+            authStore.setAuthenticated(true);
+            return true;
+        } else {
+            console.log("Autenticación fallida");
+            authStore.setAuthenticated(false);
+            return false;
+        }
+    })
+}
+
 async function storeSecrets(pass_salt: Uint8Array, pubKey: CryptoKey, cypherData: EncryptedData, mail:string, usr: string) {
     const encoded_salt      = await encodeService.encodeBase64(pass_salt);
     const encoded_pubKey    = await encodeService.encodeBase64(pubKey);
     const encoded_iv        = await encodeService.encodeBase64(cypherData.iv);
     const encoded_cypherKey = await encodeService.encodeBase64(cypherData.cyphertext);
 
-    await axios.post('/api/register', {
+    await axios.post(`${ENDPOINT_API_STORE}`, {
         salt:      encoded_salt,
         publicKey: encoded_pubKey,
         iv:        encoded_iv,
@@ -91,7 +99,7 @@ async function storeSecrets(pass_salt: Uint8Array, pubKey: CryptoKey, cypherData
 }
 
 async function getKeyRecord(username: string) { //obtenesmo todo lo necesario para autenticarnos: nonce(Para challenge), salt, cypherprivk, iv, pubkey
-    return axios.get(`/api/keyRecord/${username}`)
+    return axios.get(`${ENDPOINT_API_KEYRECORD}${username}`)
         .then(({ data }) => ({
             salt:        encodeService.decodeBase64ToUintArray(data.salt),
             nonce:       encodeService.decodeBase64ToUintArray(data.nonce),
