@@ -43,7 +43,8 @@ export async function login(username: string, password: string) { //Aquí se des
     
     if (isAuth) {
         console.log("Login con exito");
-        //await authStore.saveLoginState(encKey, authKey); Esto ya veré como funciona...
+        const authStore = useAuthStore();
+        authStore.setEncKey(encKey);
     } else {
         console.log("Login fallido");
     }
