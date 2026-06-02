@@ -88,11 +88,10 @@ export async function derivateMKey(masterKey: CryptoKey, info: string): Promise<
 
 
 
-export async function encryptData(data: string | CryptoKey , encKey: CryptoKey) : Promise<EncryptedData> { //retorna un objetco con el texto cifrado y el IV utilizado para el cifrado. Iv es vital para descrifrado.
+export async function encryptData(data: string | CryptoKey, encKey: CryptoKey) : Promise<EncryptedData> { //retorna un objetco con el texto cifrado y el IV utilizado para el cifrado. Iv es vital para descrifrado.
     const encoder = new TextEncoder();
-    const dataBytes = (typeof data == "string") ? encoder.encode(data.toString()) : await crypto.subtle.exportKey("pkcs8", data) ;
+    const dataBytes = (typeof data == "string") ? encoder.encode(data.toString()) : await crypto.subtle.exportKey("pkcs8", data);
     const iv : Uint8Array = crypto.getRandomValues(new Uint8Array(12)); //AES-GCM recomienda un iv de 12 bytes
-
     const cypherData = await crypto.subtle.encrypt(
         {
             name: 'AES-GCM',
@@ -104,8 +103,6 @@ export async function encryptData(data: string | CryptoKey , encKey: CryptoKey) 
    
     return {cyphertext: cypherData, iv: iv};
 }
-
-
 
 export async function decryptData(cyphertext: Uint8Array, iv: Uint8Array, encKey: CryptoKey) : Promise<ArrayBuffer> { // esta función descifra los datos cifrados usando AES-GCM y el IV utilizado para el cifrado
     // Mejor lo hago fuera si lo necesito. const decoder = new TextDecoder(); //Para decodificar el resultado.
