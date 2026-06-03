@@ -25,28 +25,27 @@
           <p class="text-xs text-stone-400 truncate">{{ card.mail }}</p>
         </div>
         <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition">
-          <button class="p-1.5 rounded-lg hover:bg-stone-700 text-stone-400 hover:text-white"><img src="@/assets/icons/pen.svg" alt="Editar" class="w-4 h-4" @click="openModalEditar = true"></button>
-          <button class="p-1.5 rounded-lg hover:bg-stone-700 text-stone-400 hover:text-white"><img src="@/assets/icons/ojo.svg" alt="Ver" class="w-4 h-4" @click="openModalDatos = true"></button>
-          <button class="p-1.5 rounded-lg hover:bg-stone-700 text-stone-400 hover:text-red-400"><img src="@/assets/icons/trash_can.svg" alt="Eliminar" class="w-4 h-4" @click="openModalConfirm = true"></button>
+          <button class="p-1.5 rounded-lg hover:bg-stone-700 text-stone-400 hover:text-white"><img src="@/assets/icons/pen.svg" alt="Editar" class="w-4 h-4" @click="openModal('editar', card)"></button>
+          <button class="p-1.5 rounded-lg hover:bg-stone-700 text-stone-400 hover:text-white"><img src="@/assets/icons/ojo.svg" alt="Ver" class="w-4 h-4" @click="openModal('datos', card)"></button>
+          <button class="p-1.5 rounded-lg hover:bg-stone-700 text-stone-400 hover:text-red-400"><img src="@/assets/icons/trash_can.svg" alt="Eliminar" class="w-4 h-4" @click="openModal('confirm', card)"></button>
         </div>
       </li>
     </ul>
 
   </div>
 
-  <button @click="openModalAñadir = true"
+  <button @click="openModal('añadir')"
     class="fixed bottom-6 right-6 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-800 text-white font-medium px-5 py-2.5 rounded-full transition">
     + Añadir
   </button>
 
   <!-- Modales -->
-  <AddCardModal v-if="openModalAñadir" @close="openModalAñadir = false"/>
-  <EditCardModal v-if="openModalEditar" @close="openModalEditar = false"/>
-  <CardDataModal v-if="openModalDatos" @close="openModalDatos = false"/>
-  <ConfirmPasswordModal v-if="openModalConfirm" @close="openModalConfirm = false"/>
-  
+  <ConfirmPasswordModal v-if="openConfirm" @close="openConfirm = false" @verified="onVerified"/>
+  <AddCardModal v-if="modalEscogido.añadir && confirmedPassword" :password="password" @close="closeModal()"/>
+  <EditCardModal v-if="modalEscogido.editar && confirmedPassword && selectedCard" :card="selectedCard" :password="password" @close="closeModal()"/>
+  <CardDataModal v-if="modalEscogido.datos && confirmedPassword && selectedCard" :card="selectedCard" :password="password" @close="closeModal()"/>
+
 </template>
-/*
 <script>
 import NavBarUser from '@/components/NavBarUser.vue';
 import { useAuthStore } from '@/stores/auth';
@@ -66,10 +65,15 @@ export default {
     data(){
         return {
             search: '',
-            openModalAñadir: false,
-            openModalEditar: false,
-            openModalDatos: false,
-            openModalConfirm: false
+            confirmedPassword: false,
+            modalEscogido: {
+              añadir: false,
+              editar: false,
+              datos: false,
+            },
+            openConfirm: false,
+            password: '',
+            selectedCard: null
         }
     },
     setup(){
@@ -84,8 +88,27 @@ export default {
             return this.cards.filter(c =>
                 c.domain?.toLowerCase().includes(this.search.toLowerCase())
             )
+      }
+    },
+    methods:{
+      closeModal(){
+        for (let k in this.modalEscogido) {
+          this.modalEscogido[k] = false;
+        }
+        this.confirmedPassword = false
+        this.openConfirm = false
+        this.selectedCard = null
       },
-      methods:{}
-}
+      openModal(modal, card = null) {
+        this.selectedCard = card;
+        this.openConfirm = true;
+        this.modalEscogido[modal] = true;
+      },
+      onVerified(password) {
+        this.confirmedPassword = true;
+        this.openConfirm = false;
+        this.password = password;
+      }
+    }
 }
 </script>

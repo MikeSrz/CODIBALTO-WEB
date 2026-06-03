@@ -11,6 +11,21 @@ const ENDPOINT_API_CHALLENGE = `${BASE_URL}/api/auth/challenge/`;
 const ENDPOINT_API_KEYRECORD = `${BASE_URL}/api/auth/key-records/`
 const ENDPOINT_API_STORE = `${BASE_URL}/api/auth/register-user/` 
 
+export async function quickAuth(password: string): Promise<boolean> {
+    try {
+        const authStore = useAuthStore()
+        const salt = authStore.salt
+        const Mkey: CryptoKey = await cryptoService.derivateMasterPassword(password, salt as Uint8Array);
+        const encKey: CryptoKey = await cryptoService.derivateMKey(Mkey, INFO_ENCRYPT);
+
+        const keyRecord = await getKeyRecord(authStore.user.username);
+        await cryptoService.decryptData(keyRecord.cypherprivk, keyRecord.iv, encKey);
+        return true; 
+    } catch {
+        return false;
+    }
+}
+
 export async function register(username: string, email: string, password: string, nombre: string, apellido: string) {
     const salt : Uint8Array= cryptoService.generateSalt();
     const salt_card :  Uint8Array = cryptoService.generateSalt();
@@ -40,8 +55,9 @@ export async function login(username: string | null, mail: string | null, passwo
     const master = await cryptoService.derivateMasterPassword(password, keyRecord.salt)
     const encKey = await cryptoService.derivateMKey(master, INFO_ENCRYPT)
     
-    //guardando en el store
+    //guardando en el store salts
     authStore.setSalt(keyRecord.salt)
+    authStore.setSaltCard(keyRecord.salt_card)
     //const authKey = await cryptoService.derivateMKey(master, INFO_AUTH) Ya no es necesario
     
     //descifrnado clave privada:
@@ -147,13 +163,14 @@ async function storeUser(pass_salt: Uint8Array,card_salt: Uint8Array, pubKey: Ar
     });
 }
 
-async function getKeyRecord(username:string | null, mail:string | null ) {
+async function getKeyRecord(username:string | null, mail:string | null = null ) { //Te descodifica tambien los datos y te da sus bytes
     return axios.post(`${ENDPOINT_API_KEYRECORD}`, { username: username, email: mail })
         .then(({ data }) => ({
             salt:        encodeService.decodeBase64ToUintArray(data.salt),
             cypherprivk: encodeService.decodeBase64ToUintArray(data.cypherprivk),
             iv:          encodeService.decodeBase64ToUintArray(data.iv),
-            nonce:       encodeService.decodeBase64ToUintArray(data.nonce)
+            nonce:       encodeService.decodeBase64ToUintArray(data.nonce),
+            salt_card:    encodeService.decodeBase64ToUintArray(data.salt_card)
         }))
         .catch(error => {
             console.error("Error al obtener el keyRecord del servidor: ", error)

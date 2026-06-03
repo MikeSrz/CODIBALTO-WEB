@@ -6,7 +6,6 @@
                 <h2 class="text-white text-xl font-bold">Nueva contraseña</h2>
                 <button class="text-stone-400 hover:text-white" @click="$emit('close')">✕</button>
             </div>
-
             <!-- Formulario -->
             <form @submit.prevent="addCard" class="flex flex-col gap-4">
                 <input v-model="form.domain" type="text" required placeholder="google.com"
@@ -39,7 +38,10 @@
 import { storeCard } from '@/services/cardService';
 
 export default {
-    emits: ['close'],
+    emits: ['close', 'password'],
+    props: {
+        password: { type: String, required: true }
+    },
     data() {
         return {
             form : {
@@ -54,7 +56,7 @@ export default {
         addCard(){
             if(this.checkForm()){ 
                 //Tengo que cifrar contraseñas, email antes de enviar.
-                storeCard(this.form)
+                storeCard(this.form, this.password)
                 this.$emit('close')
             } else
                 console.warn("No se han ingresado los campos obligatorios") 

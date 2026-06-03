@@ -115,7 +115,7 @@ export async function decryptData(cyphertext: Uint8Array, iv: Uint8Array, encKey
         cyphertext.buffer as ArrayBuffer
     );
     return decryptedBytes;
-}
+} //devuelve bytes así que convirtiendo a string con un decoder lo tenemos.
 
 export async function signChallengeECDSA(privateKey: CryptoKey, nonce: Uint8Array): Promise<ArrayBuffer> { //firma del nonce con nuestra clave privada descifrada
     return await crypto.subtle.sign(
