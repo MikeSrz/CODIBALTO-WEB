@@ -5,13 +5,13 @@
     <div class="min-h-screen bg-stone-900 text-white p-8">
         <ul class="flex flex-col gap-4">
             <RouterLink to="/registro" v-if="!auth.isAuthenticated">
-                <li class="group bg-stone-800 rounded-lg p-6 hover:bg-indigo-700 transition">
+                <li class="group bg-stone-800 rounded-lg p-6 hover:bg-indigo-800 transition">
                     <h2 class="text-lg font-semibold mb-1 group-hover:text-white">Registrarse</h2>
                     <p class="text-stone-400 text-sm group-hover:text-white">Crea tu cuenta de forma segura con autenticación criptográfica.</p>
                 </li>
             </RouterLink>
             <RouterLink to="/password-vault" v-if="auth.isAuthenticated">
-                <li class="group bg-stone-800 rounded-lg p-6 hover:bg-indigo-700 transition">
+                <li class="group bg-stone-800 rounded-lg p-6 hover:bg-indigo-800 transition">
                     <h2 class="text-lg font-semibold mb-1 group-hover:text-white">Vault de contraseñas</h2>
                     <p class="text-stone-400 text-sm group-hover:text-white">Guarda y gestiona todas tus contraseñas en un lugar seguro y cifrado.</p>
                 </li>

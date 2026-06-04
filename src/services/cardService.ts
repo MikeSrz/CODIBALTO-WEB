@@ -9,8 +9,10 @@ import { encryptData, decryptData, derivateMasterPassword, derivateMKey} from "@
 
 const BASE_URL = import.meta.env.VITE_API_URL
 const API_STORE_CARD = `${BASE_URL}/api/card/store/`;
+const API_MODIFY_CARD = `${BASE_URL}/api/card/modify/`;
+const API_DELETE_CARD = `${BASE_URL}/api/card/delete/`;
 
-export async function storeCard(newData: NewPassCard, masterPassword: string) { //Encriptar password e email y almacenar. => necesito tener la encKey
+export async function storeCard(newData: NewPassCard, masterPassword: string) {//Encriptar password e email y almacenar. => necesito tener la encKey
     const auth = useAuthStore()
     const encKeyCard: CryptoKey = await generateEncKeyCard(masterPassword);
     if (!encKeyCard) {
@@ -20,12 +22,16 @@ export async function storeCard(newData: NewPassCard, masterPassword: string) { 
     const encryptedData: EncryptedData =   await encryptData(newData.password, encKeyCard)
     const encryptedDataEmail: EncryptedData  = await encryptData(newData.email_card, encKeyCard)
     const payload = {
-        domain: newData.domain,
+        tagname: newData.tagname,
         email_card: await encodeBase64(encryptedDataEmail.cyphertext),
         cipher_password: await encodeBase64(encryptedData.cyphertext),
         notes: newData.notes,
         iv_ps: await encodeBase64(encryptedData.iv),
-        iv_em: await encodeBase64(encryptedDataEmail.iv)
+        iv_em: await encodeBase64(encryptedDataEmail.iv),
+        card_site: {
+            domain: newData.card_site.domain,
+            site: newData.card_site.site
+        }
     }
     api.post(API_STORE_CARD, payload)
     .then(async (response) => {
@@ -39,7 +45,47 @@ export async function storeCard(newData: NewPassCard, masterPassword: string) { 
         }
     );
 }
-export async function decryptCard(iv_ps:string , iv_em: string, ciph_mail:string, ciph_password:string, masterPassword: string){
+
+export async function modifyCard(newData: PassCard, masterPassword: string) {
+    //crear funcion para esto => solo se puede modificar las notas, el mail y el password
+    const auth = useAuthStore();
+    const encKeyCard = await generateEncKeyCard(masterPassword);
+    if (!encKeyCard) {
+        console.error("No hay clave de cifrado")
+        return
+    }
+    const encryptedData: EncryptedData =   await encryptData(newData.cipher_password, encKeyCard)
+    const encryptedDataEmail: EncryptedData  = await encryptData(newData.email_card, encKeyCard)
+
+    const payload = {
+        id:                 newData.id,
+        tagname:            newData.tagname,
+        email_card:         await encodeBase64(encryptedDataEmail.cyphertext),
+        cipher_password:    await encodeBase64(encryptedData.cyphertext),
+        notes:              newData.notes,
+        iv_ps:              await encodeBase64(encryptedData.iv),
+        iv_em:              await encodeBase64(encryptedDataEmail.iv),
+        card_site:{
+            domain: newData.card_site.domain,
+            site: newData.card_site.site
+        }
+    }
+
+    await api.post(`${API_MODIFY_CARD}`, payload).
+    then(async(response) => {
+            const userData = await getUserData()
+            auth.setUserData(userData)
+            return response.data
+    }).catch(() => {
+            console.log("[ERROR] No se pudo guardar correctamente");
+        }
+    )
+
+}
+
+
+
+export async function decryptCard(iv_ps:string , iv_em: string, ciph_mail:string, ciph_password:string, masterPassword: string){ //viene todo en base64
     const decoder = new TextDecoder();
     const encKeyCard: CryptoKey = await generateEncKeyCard(masterPassword);
     const ciph_ps = decodeBase64ToUintArray(ciph_password)
@@ -68,10 +114,15 @@ async function generateEncKeyCard(password: string){
     return encKeyCard
 }
 
-export async function modifyCard(newData: NewPassCard) {
-
-}
-
 export async function deleteCard(cardId: number) {
-    
+    const auth = useAuthStore();
+    api.delete(`${API_DELETE_CARD}${cardId}`)
+    .then(async (response) => {
+        console.log("Contraseña eliminada ")
+        const userData = await getUserData();
+            auth.setUserData(userData);
+    })
+    .catch((error)=>{
+        console.error("Error al eliminar", error);
+    })
 }

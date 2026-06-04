@@ -1,23 +1,33 @@
 <template>
     <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-        <div class="bg-stone-800 rounded-xl p-6 w-full max-w-md shadow-xl">
-            <!-- Cabecera -->
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-white font-semibold text-lg">{{ card.domain }}</h2>
-                <button class="text-stone-400 hover:text-white" @click="$emit('close')">✕</button>
+        <div class="bg-stone-900 border border-white/[0.08] rounded-2xl p-7 w-full max-w-md shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-3">
+                    <h2 class="text-stone-100 text-base font-medium mb-3">Datos de su contraseña</h2>
+                </div>
+                <button class="w-7 h-7 rounded-md border border-white/10 text-stone-400 hover:text-stone-200 hover:bg-white/5 flex items-center justify-center text-sm transition" @click="$emit('close')" aria-label="Cerrar">✕</button>
             </div>
 
             <!-- Datos -->
-            <div class="flex flex-col gap-3">
+                 <div class="flex flex-col gap-3">
+                <div class="w-full bg-stone-950 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500">
+                    <p class="text-xs text-stone-400 mb-0.5">Dominio</p>
+                    <p class="text-white text-sm">{{ card.card_site.domain || 'Cargando...' }}</p>
+                </div>
+                
+                <div class="w-full bg-stone-950 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500">
+                    <p class="text-xs text-stone-400 mb-0.5">URL</p>
+                    <p class="text-white text-sm">{{ card.card_site.site || 'Cargando...' }}</p>
+                </div>
 
                 <!-- Email -->
-                <div class="bg-stone-700 rounded-lg px-4 py-2">
+                <div class="w-full bg-stone-950 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500">
                     <p class="text-xs text-stone-400 mb-0.5">Email</p>
                     <p class="text-white text-sm">{{ decrypted.email || 'Cargando...' }}</p>
                 </div>
 
                 <!-- Contraseña -->
-                <div class="bg-stone-700 rounded-lg px-4 py-2 flex items-center justify-between">
+                <div class="w-full bg-stone-950 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-between">
                     <div>
                         <p class="text-xs text-stone-400 mb-0.5">Contraseña</p>
                         <p class="text-white text-sm font-mono">
@@ -31,7 +41,7 @@
                 </div>
 
                 <!-- Notas -->
-                <div v-if="card.notes" class="bg-stone-700 rounded-lg px-4 py-2">
+                <div v-if="card.notes" class="w-full bg-stone-950 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500">
                     <p class="text-xs text-stone-400 mb-0.5">Notas</p>
                     <p class="text-white text-sm whitespace-pre-wrap">{{ card.notes }}</p>
                 </div>
