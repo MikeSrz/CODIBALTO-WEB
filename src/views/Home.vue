@@ -7,7 +7,7 @@
             <RouterLink to="/registro" v-if="!auth.isAuthenticated">
                 <li class="group bg-stone-800 rounded-lg p-6 hover:bg-indigo-800 transition">
                     <h2 class="text-lg font-semibold mb-1 group-hover:text-white">Registrarse</h2>
-                    <p class="text-stone-400 text-sm group-hover:text-white">Crea tu cuenta de forma segura con autenticación criptográfica.</p>
+                    <p class="text-stone-400 text-sm group-hover:text-white">Crea tu cuenta de forma segura con autenticación criptográfica y gestiona tu vault de contraseñas.</p>
                 </li>
             </RouterLink>
             <RouterLink to="/password-vault" v-if="auth.isAuthenticated">
@@ -17,12 +17,17 @@
                 </li>
             </RouterLink>
 
-            <li class="bg-stone-800 rounded-lg p-6">
+            <li class="group bg-stone-800 rounded-lg p-6 hover:bg-indigo-800 transition cursor-pointer" @click="openAuditorModal()" >
                 <h2 class="text-lg font-semibold mb-1">Auditor de contraseñas</h2>
-                <p class="text-stone-400 text-sm">Analiza la seguridad de tus contraseñas y detecta las más vulnerables.</p>
+                <p class="text-stone-400 text-sm group-hover:text-white">Analiza la seguridad de contraseñas y detecta las más vulnerables.</p>
+            </li>
+            <li class="group bg-stone-800 rounded-lg p-6 hover:bg-indigo-800 transition cursor-pointer" @click="openGeneradorModal()" >
+                <h2 class="text-lg font-semibold mb-1">Generador de contraseñas</h2>
+                <p class="text-stone-400 text-sm group-hover:text-white">Copia contraseñas seguras generadas por Codibalto</p>
             </li>
         </ul>
     </div>
+    <AuditPasswordModal v-if="modal.auditor" @close="closeAuditorModal()"/>
 </template>
 
 <script>
@@ -31,15 +36,40 @@ import NavBarUser from '@/components/NavBarUser.vue';
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.ts';
 import { capitalize } from '@/services/utils.ts';
+import AuditPasswordModal from '@/components/modals/AuditPassword.vue';
+
 export default {
     components: {
         NavBar,
-        NavBarUser
+        NavBarUser,
+        AuditPasswordModal
+    },
+    data(){
+        return {
+            modal: {
+                auditor : false,
+                generador: false
+            }
+        }
     },
     setup(){
         const auth = useAuthStore()
         const userInfo = auth.user
         return {auth, userInfo, capitalize}
+    },
+    methods : {
+        openAuditorModal(){
+            this.modal.auditor = true
+        },
+        closeAuditorModal(){
+            this.modal.auditor = false
+        },
+        openGeneradorModal(){
+            this.modal.generador = true
+        },
+        closeGeneradorModal(){
+            this.modal.generador = false
+        }
     }
 }
 </script>

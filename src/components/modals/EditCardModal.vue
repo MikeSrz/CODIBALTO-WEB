@@ -3,10 +3,10 @@
         <div class="bg-stone-900 border border-white/[0.08] rounded-2xl p-7 w-full max-w-md shadow-2xl">
             <!-- Cabecera -->
             <div class="flex justify-between items-center mb-6">
-            <div class="flex items-center gap-3">
-                <h2 class="text-stone-100 text-base font-medium mb-3">Edición de datos de su contraseña</h2>
-            </div>
-            <button class="w-7 h-7 rounded-md border border-white/10 text-stone-400 hover:text-stone-200 hover:bg-white/5 flex items-center justify-center text-sm transition" @click="$emit('close')" aria-label="Cerrar">✕</button>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-stone-100 text-base font-medium mb-3">Edición de datos de su contraseña</h2>
+                </div>
+                <button class="w-7 h-7 rounded-md border border-white/10 text-stone-400 hover:text-stone-200 hover:bg-white/5 flex items-center justify-center text-sm transition" @click="$emit('close')" aria-label="Cerrar">✕</button>
             </div>
             <!-- Formulario -->
             <form @submit.prevent="addCard" class="flex flex-col gap-3">

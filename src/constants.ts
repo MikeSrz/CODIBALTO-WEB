@@ -6,4 +6,13 @@ const KEY_TYPES = {
                     secret:'raw'
                     } as const;
 
-export {INFO_ENCRYPT, INFO_AUTH, KEY_TYPES};
+const SECURITY_LEVEL = {
+    high: 'high',
+    mid: 'mid',
+    low: 'low'
+} as const;
+
+const MIN_LENGTH_SEQUENCE = 4
+
+export {INFO_ENCRYPT, INFO_AUTH, KEY_TYPES,MIN_LENGTH_SEQUENCE, SECURITY_LEVEL};
+

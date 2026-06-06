@@ -12,18 +12,18 @@
                  <div class="flex flex-col gap-3">
                 <div class="w-full bg-stone-950 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500">
                     <p class="text-xs text-stone-400 mb-0.5">Dominio</p>
-                    <p class="text-white text-sm">{{ card.card_site.domain || 'Cargando...' }}</p>
+                    <p class="text-white text-sm">{{ card.card_site.domain || 'vacío' }}</p>
                 </div>
                 
                 <div class="w-full bg-stone-950 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500">
                     <p class="text-xs text-stone-400 mb-0.5">URL</p>
-                    <p class="text-white text-sm">{{ card.card_site.site || 'Cargando...' }}</p>
+                    <p class="text-white text-sm">{{ card.card_site.site || 'vacío' }}</p>
                 </div>
 
                 <!-- Email -->
                 <div class="w-full bg-stone-950 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500">
                     <p class="text-xs text-stone-400 mb-0.5">Email</p>
-                    <p class="text-white text-sm">{{ decrypted.email || 'Cargando...' }}</p>
+                    <p class="text-white text-sm">{{ decrypted.email || 'vacío' }}</p>
                 </div>
 
                 <!-- Contraseña -->

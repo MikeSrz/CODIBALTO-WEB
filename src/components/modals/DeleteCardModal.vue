@@ -33,7 +33,7 @@ export default {
     },
     methods: {
         async deleteCard(){
-            deleteCard(this.card.id)
+            await deleteCard(this.card.id)
             this.$emit('close')
         }
     }

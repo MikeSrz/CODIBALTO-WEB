@@ -5,6 +5,7 @@ import * as cryptoService from './cryptoService'
 import * as encodeService from './encodeService'
 import axios from 'axios'
 import api from './api'
+
 const BASE_URL = import.meta.env.VITE_API_URL 
 const ENDPOINT_API_USER_DATA = `${BASE_URL}/api/auth/user-data/`
 const ENDPOINT_API_CHALLENGE = `${BASE_URL}/api/auth/challenge/`; 
@@ -78,7 +79,6 @@ export async function login(username: string | null, mail: string | null, passwo
 
     if (isAuth) {
         console.log("Login con exito");
-        console.log(authStore.token)
         const userData = await getUserData()
         authStore.setUserData(userData)
         //await authStore.saveLoginState(encKey, authKey); Esto ya veré como funciona...

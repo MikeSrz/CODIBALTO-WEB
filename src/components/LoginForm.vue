@@ -1,20 +1,25 @@
 <!-- LoginForm.vue — sin fondo ni pantalla completa -->
 <template>
-    <div class="bg-stone-800 rounded-lg p-8 w-full max-w-md">
-        <h1 class="text-white text-2xl font-bold mb-6">Login</h1>
+    <div class="flex items-center justify-center min-h-[calc(100vh-64px)] px-4">
+        <div class="bg-stone-900 border border-white/[0.08] rounded-2xl p-7 w-full max-w-md shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-3">
+                    <h2 class="text-stone-100 text-base font-medium mb-3">Login Usuario </h2>
+                </div>
+            </div>
 
         <form class="flex flex-col gap-4" @submit.prevent="handleLogin">
 
             <div class="flex flex-col gap-1">
                 <label class="text-stone-300 text-sm">Usuario / E-mail</label>
                 <input v-model="form.usernameEmail" type="text" required
-                    class="bg-stone-700 text-white rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"/>
+                    class="w-full bg-stone-950 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"/>
             </div>
 
             <div class="flex flex-col gap-1">
                 <label class="text-stone-300 text-sm">Contraseña</label>
                 <input v-model="form.password" type="password" required
-                    class="bg-stone-700 text-white rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"/>
+                    class="w-full bg-stone-950 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"/>
             </div>
 
             <p v-if="error" class="text-red-400 text-xs">{{ error }}</p>
@@ -23,8 +28,16 @@
                 class="bg-indigo-600 text-white py-2 rounded hover:bg-indigo-800 transition mt-2 disabled:opacity-50">
                 {{ loading ? 'Entrando...' : 'Entrar' }}
             </button>
-
         </form>
+        <p class="text-stone-300">
+            Si no tienes cuenta puedes 
+            <router-link 
+                to="/registro"
+                class="text-blue-400 hover:text-blue-300 underline ">
+                registrarte
+            </router-link>
+        </p>
+    </div>
     </div>
 </template>
 

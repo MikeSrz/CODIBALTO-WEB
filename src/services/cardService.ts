@@ -107,7 +107,6 @@ export async function decryptCard(iv_ps:string , iv_em: string, ciph_mail:string
 async function generateEncKeyCard(password: string){
     const auth = useAuthStore();
     const saltCard = auth.saltCard;
-    console.log(auth.saltCard);
     //obtenemos la enckeycard derivando
     const MKeyCard = await derivateMasterPassword(password, saltCard as Uint8Array)
     const encKeyCard = await derivateMKey(MKeyCard, INFO_ENCRYPT)

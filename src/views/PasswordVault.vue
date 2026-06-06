@@ -45,11 +45,15 @@
   </button>
 
   <!-- Modales -->
-  <ConfirmPasswordModal v-if="openConfirm" @close="openConfirm = false" @verified="onVerified" @abort="onAbortConfirm()" />
+  <ConfirmPasswordModal v-if="openConfirm" @close="openConfirm = false" @verified="onVerified"
+    @abort="onAbortConfirm()" />
   <AddCardModal v-if="modalEscogido.añadir && confirmedPassword" :password="password" @close="closeModal()" />
-  <EditCardModal v-if="modalEscogido.editar && confirmedPassword && selectedCard" :card="selectedCard":password="password" @close="closeModal()" />
-  <CardDataModal v-if="modalEscogido.datos && confirmedPassword && selectedCard" :card="selectedCard":password="password" @close="closeModal()" />
-  <DeleteCardModal v-if="modalEscogido.borrar && confirmedPassword && selectedCard" :card="selectedCard":password="password" @close="closeModal()"/>
+  <EditCardModal v-if="modalEscogido.editar && confirmedPassword && selectedCard" :card="selectedCard"
+    :password="password" @close="closeModal()" />
+  <CardDataModal v-if="modalEscogido.datos && confirmedPassword && selectedCard" :card="selectedCard"
+    :password="password" @close="closeModal()" />
+  <DeleteCardModal v-if="modalEscogido.borrar && confirmedPassword && selectedCard" :card="selectedCard"
+    :password="password" @close="closeModal()" />
 </template>
 <script>
 import NavBarUser from '@/components/NavBarUser.vue';

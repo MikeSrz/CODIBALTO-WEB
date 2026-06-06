@@ -39,3 +39,20 @@ export interface UserData {
     apellido: string | null
     passCards: PassCard[]
 }
+
+//
+export interface AuditResults {
+    length: string
+    diversity: string
+    entropy: string
+    patterns: string
+    breaches:  number
+}
+
+// booleanos de comprobaciones de diversidad.
+export interface PasswordDiversity {
+    hasUpper: boolean 
+    hasLower: boolean
+    hasNum: boolean 
+    hasSym: boolean  
+}
