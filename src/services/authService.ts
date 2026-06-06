@@ -4,9 +4,9 @@ import { useAuthStore } from '../stores/auth'
 import * as cryptoService from './cryptoService'
 import * as encodeService from './encodeService'
 import axios from 'axios'
-import api from './api'
+import api from '@/services/api'
 
-const BASE_URL = import.meta.env.VITE_API_URL 
+const BASE_URL = import.meta.env.VITE_API_URL
 const ENDPOINT_API_USER_DATA = `${BASE_URL}/api/auth/user-data/`
 const ENDPOINT_API_CHALLENGE = `${BASE_URL}/api/auth/challenge/`; 
 const ENDPOINT_API_KEYRECORD = `${BASE_URL}/api/auth/key-records/`
