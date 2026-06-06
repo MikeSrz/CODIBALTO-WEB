@@ -24,22 +24,36 @@ const SECUENCIA_NUMBERS = [
 
 //Limitarmos las contraseñas a ASCII aunque puedo considerar usar UNICODE
 
+//funcion para generar contraseña
+export function generatePassword(len = 32){
+    const caracteres ="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+?";
+    const valores = new Uint32Array(len);
+    crypto.getRandomValues(valores); //introducimos valores aleatorios 
+    let newPassword: string = '';
+    for (const v of valores) {
+        newPassword += caracteres[v % caracteres.length];
+    }
+    console.log(newPassword)
+    return newPassword;
+}
+
 /*
-[PASS] Length Test =>
+Funciones de auditoria
+[PASS] Length Test => Sí
 
 [PASS] Character Diversity => si
 
 [PASS] Entropy Analysis => si
 
-[PASS] Common Password Check 
+[PASS] Common Password Check => aun no
 
 [PASS] Pattern Detection => Sí 
 
-[PASS] Repetition Analysis =>
+[PASS] Repetition Analysis => aun no
 
-[PASS] Dictionary Matching =>
+[PASS] Dictionary Matching => aun no
 
-[PASS] Breach Database Lookup
+[PASS] Breach Database Lookup => Sí
 */
 
 export function checkDiversity(password: string):PasswordDiversity { 

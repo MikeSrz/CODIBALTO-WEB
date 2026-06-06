@@ -1,7 +1,7 @@
 <!-- LoginForm.vue — sin fondo ni pantalla completa -->
 <template>
     <div class="flex items-center justify-center min-h-[calc(100vh-64px)] px-4">
-        <div class="bg-stone-900 border border-white/[0.08] rounded-2xl p-7 w-full max-w-md shadow-2xl">
+        <div class="bg-stone-900 border border-white/[0.08] rounded-2xl p-7 w-full max-w-md shadow-lg">
             <div class="flex justify-between items-center mb-6">
                 <div class="flex items-center gap-3">
                     <h2 class="text-stone-100 text-base font-medium mb-3">Login Usuario </h2>

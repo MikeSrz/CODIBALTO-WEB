@@ -4,14 +4,6 @@
 
             <div class="flex justify-between items-center mb-6">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-500/15 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-[17px] h-[17px] text-indigo-400"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M12 3a9 9 0 0 0-9 9v.6l2.8 5.4A2 2 0 0 0 7.6 19H9v-7h6v7h1.4a2 2 0 0 0 1.8-1l2.8-5.4V12a9 9 0 0 0-9-9z" />
-                        </svg>
-                    </div>
                     <h2 class="text-stone-100 text-base font-medium">Auditor de Contraseñas</h2>
                 </div>
                 <button

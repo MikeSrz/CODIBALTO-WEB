@@ -27,6 +27,7 @@
             </li>
         </ul>
     </div>
+    <GeneradorModal v-if="modal.generador" @close="closeGeneradorModal()"/>
     <AuditPasswordModal v-if="modal.auditor" @close="closeAuditorModal()"/>
 </template>
 
@@ -37,11 +38,13 @@ import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.ts';
 import { capitalize } from '@/services/utils.ts';
 import AuditPasswordModal from '@/components/modals/AuditPassword.vue';
+import GeneradorModal from '@/components/modals/GeneradorModal.vue';
 
 export default {
     components: {
         NavBar,
         NavBarUser,
+        GeneradorModal,
         AuditPasswordModal
     },
     data(){
