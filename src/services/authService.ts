@@ -135,7 +135,6 @@ async function storeUser(pass_salt: Uint8Array,card_salt: Uint8Array, pubKey: Ar
     const encoded_pubKey    = await encodeService.encodeBase64(pubKey);
     const encoded_iv        = await encodeService.encodeBase64(cypherData.iv);
     const encoded_cypherKey = await encodeService.encodeBase64(cypherData.cyphertext);
-    console.log("hola")
     await apis.publicApi.post(`${ENDPOINT_API_STORE}`, {
         security: {
             salt:      encoded_salt,
