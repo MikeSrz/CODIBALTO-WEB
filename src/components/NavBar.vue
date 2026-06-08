@@ -5,9 +5,6 @@
             <img src="../assets/only_logo.svg" alt="Logo" class="block sm:hidden w-8" />
         </RouterLink>
         <div class="flex items-center gap-6">
-            <RouterLink to="/info" class="text-stone-300 hover:text-white transition">
-                Info
-            </RouterLink>
             <RouterLink to="/login" class="text-stone-300 hover:text-white transition">
                 Login
             </RouterLink>
