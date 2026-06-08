@@ -110,7 +110,6 @@ export async function deleteCard(cardId: number) {
     const auth = useAuthStore();
     apis.api.delete(`${API_DELETE_CARD}${cardId}`)
     .then(async (response) => {
-        console.log("Contraseña eliminada ")
         const userData = await getUserData();
             auth.setUserData(userData);
     })
