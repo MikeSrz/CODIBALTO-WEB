@@ -11,21 +11,21 @@
             <a href="https://github.com/MikeSrz" target="_blank" class="text-stone-300 hover:text-white transition">
                 GitHub
             </a>
-            <RouterLink to="/user-options">
-                <img src="../assets/user_icon.svg" alt="user-config" class="w-8">
-            </RouterLink>
+            <UserDropdown />
         </div>
-
     </nav>
 </template>
 
 <script lang="ts">
 import { RouterLink } from 'vue-router'
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/auth'
+import UserDropdown from '@/components/dropdowns/UserDropDown.vue'
+
 export default {
-    setup(){
-        const auth = useAuthStore();
-        return {auth}; 
+    components: { UserDropdown },
+    setup() {
+        const auth = useAuthStore()
+        return { auth }
     },
 }
 </script>

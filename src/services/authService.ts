@@ -3,14 +3,12 @@ import type {EncryptedData} from '../types'
 import { useAuthStore } from '../stores/auth'
 import * as cryptoService from './cryptoService'
 import * as encodeService from './encodeService'
-import axios from 'axios'
-import api from '@/services/api'
+import apis from '@/services/api'
 
-const BASE_URL = import.meta.env.VITE_API_URL
-const ENDPOINT_API_USER_DATA = `${BASE_URL}/api/auth/user-data/`
-const ENDPOINT_API_CHALLENGE = `${BASE_URL}/api/auth/challenge/`; 
-const ENDPOINT_API_KEYRECORD = `${BASE_URL}/api/auth/key-records/`
-const ENDPOINT_API_STORE = `${BASE_URL}/api/auth/register-user/` 
+const ENDPOINT_API_USER_DATA = 'auth/user-data/'
+const ENDPOINT_API_CHALLENGE = 'auth/challenge/'
+const ENDPOINT_API_KEYRECORD = 'auth/key-records/'
+const ENDPOINT_API_STORE     = 'auth/register-user/'
 
 export async function quickAuth(password: string): Promise<boolean> {
     try {
@@ -33,7 +31,7 @@ export async function register(username: string, email: string, password: string
     
     //derivando claves 
     const Mkey : CryptoKey= await cryptoService.derivateMasterPassword(password, salt);
-    const mKeyCard : CryptoKey = await cryptoService.derivateMasterPassword(password, salt_card);
+    //const mKeyCard : CryptoKey = await cryptoService.derivateMasterPassword(password, salt_card);
 
     const encKey : CryptoKey = await cryptoService.derivateMKey(Mkey, INFO_ENCRYPT);
     //const encKeyCard : CryptoKey = await cryptoService.derivateMKey(mKeyCard, INFO_ENCRYPT); esto debo hacerlo cuando quiera encriptar un PassCard
@@ -78,12 +76,11 @@ export async function login(username: string | null, mail: string | null, passwo
     const isAuth :boolean = await challenge(challengeResponse, username, mail);
 
     if (isAuth) {
-        console.log("Login con exito");
         const userData = await getUserData()
         authStore.setUserData(userData)
         //await authStore.saveLoginState(encKey, authKey); Esto ya veré como funciona...
     } else {
-        console.log("Login fallido");
+        throw new Error('Credenciales incorrectas')
     }
 }
 
@@ -104,32 +101,31 @@ Ya no lo uso
 ///             LLAMADAS a API              /////
 /////////////////////////////////////////////////
 export async function getUserData() {
-    return api.post(`${ENDPOINT_API_USER_DATA}`)
+    return apis.api.post(`${ENDPOINT_API_USER_DATA}`)
         .then(response => {
             return response.data
         })
-        .catch(() => {
-            console.log("[ERROR] no se pudo obtener datos del usuario")
+        .catch((error) => {
+            console.error("[ERROR] no se pudo obtener datos del usuario")
+            throw error
         })
 }
 async function challenge(challengeRes: ArrayBuffer, username:string | null , email: string | null): Promise<boolean>{ //con la firma generada probaremos si la api nos confirma que es correct.
     const authStore = useAuthStore() //pinia
     const base64ChallengeRes = await encodeService.encodeBase64(challengeRes) //pasando a base64
-    return axios.post(`${ENDPOINT_API_CHALLENGE}`, {signed_nonce: base64ChallengeRes, username: username, email: email})
+    return apis.publicApi.post(`${ENDPOINT_API_CHALLENGE}`, {signed_nonce: base64ChallengeRes, username: username, email: email})
     .then( response => {
         const token = response.data.access_token
         if(token) {
             authStore.setToken(token)
-            console.log("Autenticación exitosa");
             return true;
         } else {
-            console.log("Autenticación fallida");
             return false;
         }
     })
-    .catch(() => {
+    .catch((error) => {
         authStore.setAuthenticated(false)
-        return false
+        throw error
     })
 }
 
@@ -139,8 +135,8 @@ async function storeUser(pass_salt: Uint8Array,card_salt: Uint8Array, pubKey: Ar
     const encoded_pubKey    = await encodeService.encodeBase64(pubKey);
     const encoded_iv        = await encodeService.encodeBase64(cypherData.iv);
     const encoded_cypherKey = await encodeService.encodeBase64(cypherData.cyphertext);
-
-    await axios.post(`${ENDPOINT_API_STORE}`, {
+    console.log("hola")
+    await apis.publicApi.post(`${ENDPOINT_API_STORE}`, {
         security: {
             salt:      encoded_salt,
             salt_card: encoded_card_salt,
@@ -155,16 +151,15 @@ async function storeUser(pass_salt: Uint8Array,card_salt: Uint8Array, pubKey: Ar
             apellido: apell
         }
     }).then(()=>{
-        console.log("Se ha procesado")
         return true
     }).catch(error =>{
         console.error("[ERROR]")
-        return false
+        throw error
     });
 }
 
 async function getKeyRecord(username:string | null, mail:string | null = null ) { //Te descodifica tambien los datos y te da sus bytes
-    return axios.post(`${ENDPOINT_API_KEYRECORD}`, { username: username, email: mail })
+    return apis.publicApi.post(`${ENDPOINT_API_KEYRECORD}`, { username: username, email: mail })
         .then(({ data }) => ({
             salt:        encodeService.decodeBase64ToUintArray(data.salt),
             cypherprivk: encodeService.decodeBase64ToUintArray(data.cypherprivk),

@@ -3,14 +3,14 @@ import type {EncryptedData, PassCard, NewPassCard, UserData} from '../types'
 import { useAuthStore} from "@/stores/auth";
 import {getUserData} from '@/services/authService'
 import {encodeBase64, decodeBase64ToUintArray} from '@/services/encodeService'
-import api from '@/services/api'
+import apis from '@/services/api'
 import { encryptData, decryptData, derivateMasterPassword, derivateMKey} from "@/services/cryptoService";
 
 
-const BASE_URL = import.meta.env.VITE_API_URL
-const API_STORE_CARD = `${BASE_URL}/api/card/store/`;
-const API_MODIFY_CARD = `${BASE_URL}/api/card/modify/`;
-const API_DELETE_CARD = `${BASE_URL}/api/card/delete/`;
+
+const API_STORE_CARD = `card/store/`;
+const API_MODIFY_CARD = `card/modify/`;
+const API_DELETE_CARD = `card/delete/`;
 
 export async function storeCard(newData: NewPassCard, masterPassword: string) {//Encriptar password e email y almacenar. => necesito tener la encKey
     const auth = useAuthStore()
@@ -33,17 +33,13 @@ export async function storeCard(newData: NewPassCard, masterPassword: string) {/
             site: newData.card_site.site
         }
     }
-    api.post(API_STORE_CARD, payload)
+    apis.api.post(API_STORE_CARD, payload)
     .then(async (response) => {
             const userData = await getUserData()
             auth.setUserData(userData)
             return response.data
         }
-    ).catch(
-        () => {
-            console.log("[ERROR] No se pudo guardar correctamente")
-        }
-    );
+    )
 }
 
 export async function modifyCard(newData: PassCard, masterPassword: string) {
@@ -71,15 +67,12 @@ export async function modifyCard(newData: PassCard, masterPassword: string) {
         }
     }
 
-    await api.post(`${API_MODIFY_CARD}`, payload).
+    await apis.api.post(`${API_MODIFY_CARD}`, payload).
     then(async(response) => {
             const userData = await getUserData()
             auth.setUserData(userData)
             return response.data
-    }).catch(() => {
-            console.log("[ERROR] No se pudo guardar correctamente");
-        }
-    )
+    })
 
 }
 
@@ -115,13 +108,10 @@ async function generateEncKeyCard(password: string){
 
 export async function deleteCard(cardId: number) {
     const auth = useAuthStore();
-    api.delete(`${API_DELETE_CARD}${cardId}`)
+    apis.api.delete(`${API_DELETE_CARD}${cardId}`)
     .then(async (response) => {
         console.log("Contraseña eliminada ")
         const userData = await getUserData();
             auth.setUserData(userData);
-    })
-    .catch((error)=>{
-        console.error("Error al eliminar", error);
     })
 }

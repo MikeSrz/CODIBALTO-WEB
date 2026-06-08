@@ -33,7 +33,6 @@ export function generatePassword(len = 32){
     for (const v of valores) {
         newPassword += caracteres[v % caracteres.length];
     }
-    console.log(newPassword)
     return newPassword;
 }
 
@@ -72,7 +71,6 @@ export function checkDiversity(password: string):PasswordDiversity {
 
 export function rateDiversity(password:string){
     const checkResult :PasswordDiversity = checkDiversity(password)
-    console.log(checkResult)
     const ac = Object.values(checkResult).filter(Boolean).length  
     const rating = ac/Object.keys(checkResult).length
     if (rating == 1)

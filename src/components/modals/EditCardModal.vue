@@ -43,7 +43,7 @@
     </div>
 </template>
 <script>
-import { useAuthStore } from '@/stores/auth';
+import { useToast } from 'vue-toastification';
 import { decryptCard, modifyCard } from '@/services/cardService';
 
 export default {
@@ -54,13 +54,14 @@ export default {
     },
     data() {
         return {
+            loading: false,
             form: {
                 password: '',
                 email_card: '',
                 tagname: '',
                 notes: '',
                 card_site: {
-                    domain : '',
+                    domain: '',
                     site: ''
                 }
             },
@@ -73,38 +74,50 @@ export default {
     async mounted() {
         this.form.tagname = this.card.tagname;
         this.form.notes = this.card.notes ?? '';
+        this.form.card_site.domain = this.card.card_site.domain;
+        this.form.card_site.site = this.card.card_site.site;
 
+        const toast = useToast();
         try {
             const secrets = await decryptCard(
                 this.card.iv_ps,
                 this.card.iv_em,
-                this.card.email_card,       // ciph_mail
-                this.card.cipher_password,  
-                this.password              
+                this.card.email_card,
+                this.card.cipher_password,
+                this.password
             );
             this.decrypted = secrets;
-        } catch (e) {
-            console.error('Error descifrando card:', e);
+        } catch {
+            toast.error('Error al descifrar la contraseña');
+            this.$emit('close');
         }
     },
     methods: {
         async addCard() {
-            console.log(this.card.tagname)
+            const toast = useToast();
             const payload = {
-                tagname: this.form.tagname,
-                cipher_password:    this.form.password    || this.decrypted.password, //aun no está cifrado
-                email_card:  this.form.email_card  || this.decrypted.email,
-                notes:       this.form.notes,
-                iv_em:       this.card.iv_em,
-                iv_ps:       this.card.iv_ps,
-                id:          this.card.id,
-                card_site:{
-                    domain: this.card.card_site.domain,
-                    site: this.card.card_site.site
-                } 
+                id:              this.card.id,
+                tagname:         this.form.tagname,
+                cipher_password: this.form.password   || this.decrypted.password,
+                email_card:      this.form.email_card || this.decrypted.email,
+                notes:           this.form.notes,
+                iv_em:           this.card.iv_em,
+                iv_ps:           this.card.iv_ps,
+                card_site: {
+                    domain: this.form.card_site.domain,
+                    site:   this.form.card_site.site
+                }
             }
-            await modifyCard(payload, this.password);
-            this.$emit('close');
+            try {
+                this.loading = true;
+                await modifyCard(payload, this.password);
+                toast.success('Contraseña actualizada');
+                this.$emit('close');
+            } catch {
+                toast.error('Error al actualizar la contraseña');
+            } finally {
+                this.loading = false;
+            }
         }
     }
 }

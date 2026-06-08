@@ -1,4 +1,3 @@
-<!-- LoginForm.vue — sin fondo ni pantalla completa -->
 <template>
     <div class="flex items-center justify-center min-h-[calc(100vh-64px)] px-4">
         <div class="bg-stone-900 border border-white/[0.08] rounded-2xl p-7 w-full max-w-md shadow-lg">
@@ -45,11 +44,12 @@
 import { defineComponent, reactive, ref } from 'vue'
 import { login } from '../services/authService'
 import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
 
 export default defineComponent({
     setup() {
         const router = useRouter()
-
+        const toast = useToast()
         const form = reactive({
             usernameEmail: '',
             password: ''
@@ -76,8 +76,9 @@ export default defineComponent({
 
             } catch (e: any) {
                 const status = e.response?.status
-                if (status === 401) {
+                if (status === 401 || status === 404) {
                     error.value = 'Usuario o contraseña incorrectos'
+                    toast.error('Usuario o contraseña incorrectos')
                 } else {
                     error.value = 'Error al iniciar sesión, inténtalo de nuevo'
                 }

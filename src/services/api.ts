@@ -5,6 +5,8 @@ const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL
 });
 
+const publicApi = axios.create({ baseURL: import.meta.env.VITE_API_URL });
+
 api.interceptors.request.use(
     (config) => {
         const authStore = useAuthStore()
@@ -19,4 +21,20 @@ api.interceptors.request.use(
     }
 );
 
-export default api
+const responseErrorHandler = (error: any) => {
+    const status = error.response?.status;
+    if (status === 401) {
+        const authStore = useAuthStore();
+        authStore.clearAuth();
+    }
+    return Promise.reject(error);
+};
+
+
+api.interceptors.response.use(r => r, responseErrorHandler);
+publicApi.interceptors.response.use(r => r, responseErrorHandler);
+
+
+export default {
+     api,
+     publicApi}

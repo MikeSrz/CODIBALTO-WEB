@@ -17,7 +17,7 @@
                 <input v-model="form.card_site.site" type="text" placeholder="https://www.wikipedia.org (opcional)"
                     class="w-full bg-stone-950 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"/>
 
-                <input v-model="form.password" type="password" required minlength="8" placeholder="••••••••"
+                <input v-model="form.password" type="password" required minlength="2" placeholder="••••••••"
                     class="w-full bg-stone-950 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"/>
                 
                 <input v-model="form.email_card" type="email" required minlength="6" placeholder="johndoe@gmail.es"
@@ -31,7 +31,6 @@
                         Cancelar
                     </button>
                     <button type="submit"
-                        @click="addCard"
                         class="bg-indigo-600 hover:bg-indigo-800 text-white font-semibold px-4 py-2 rounded-lg transition">
                         Guardar
                     </button>
@@ -42,6 +41,7 @@
 </template>
 <script>
 import { storeCard } from '@/services/cardService';
+import { useToast } from 'vue-toastification';
 
 export default {
     emits: ['close', 'password'],
@@ -50,11 +50,11 @@ export default {
     },
     data() {
         return {
-            form : {
+            loading: false,
+            form: {
                 tagname: '',
                 password: '',
                 email_card: '',
-                tagname: '',
                 notes: '',
                 card_site: {
                     site: '',
@@ -63,20 +63,25 @@ export default {
             }
         }
     },
-    methods:{
-        addCard(){
-            if(this.checkForm()){ 
-                //Tengo que cifrar contraseñas, email antes de enviar.
-                storeCard(this.form, this.password)
-                this.$emit('close')
-            } else
-                console.warn("No se han ingresado los campos obligatorios") 
+    methods: {
+        async addCard() {
+            if (!this.checkForm()) {
+                return;
+            }
+            const toast = useToast();
+            try {
+                this.loading = true;
+                await storeCard(this.form, this.password);
+                toast.success('Contraseña guardada');
+                this.$emit('close');
+            } catch {
+                toast.error('Error al guardar la contraseña');
+            } finally {
+                this.loading = false;
+            }
         },
         checkForm() {
-             if (!this.form.tagname || !this.form.password || !this.form.email_card || !this.form.card_site.domain) {
-                return false;
-            }
-            return true
+            return !!(this.form.tagname && this.form.password && this.form.email_card && this.form.card_site.domain);
         }
     }
 }
